@@ -91,7 +91,7 @@ void BasicCPU::IF()
  * Retorna 0: se executou corretamente e
  *		   1: se a instrução não estiver implementada.
  */
-int BasicCPU::ID()
+int BasicCPU::ID()						// AQUI
 {
 	// TODO
 	//		Acrescente os cases no switch já iniciado, para detectar o grupo
@@ -117,6 +117,10 @@ int BasicCPU::ID()
 			break;
 		// case TODO
 		// x101 Data Processing -- Register on page C4-278
+		case 0x0A000000:
+		case 0x1A000000:
+			return decodeDataProcReg(); // Não soubemos fazer chamar o metodo
+			break;
 		default:
 			return 1; // instrução não implementada
 	}
@@ -227,10 +231,48 @@ int BasicCPU::decodeDataProcReg() {
 	//				'add w1, w1, w0'
 	//		que aparece na linha 43 de isummation.S e no endereço 0x68
 	//		de txt_isummation.o.txt.
-	
-	
-	// instrução não implementada
+
+	// IMPLEMENTADO __________________________________________________________
+
+	unsigned int n, m, d;
+	switch (IR & 0x7F200000)	//Não considera Shift
+	{
+		case 0x45800000:
+			
+			if (IR & 0x00600000) return 1; // sh = 1 não implementado
+
+			n = (IR & 0x000003E0) >> 5;
+			A=getW(n);
+
+			m = (IR & 0x001F0000) >> 16;
+			B = getW(m);
+
+			d = (IR & 0x0000001F);
+			if (d == 31) {
+				Rd = &SP;
+			} else {
+				Rd = &(R[d]);
+			}
+			
+			// atribuir ALUctrl
+			ALUctrl = ALUctrlFlag::ADD;
+			
+			// atribuir MEMctrl
+			MEMctrl = MEMctrlFlag::MEM_NONE;
+			
+			// atribuir WBctrl
+			WBctrl = WBctrlFlag::RegWrite;
+			
+			// atribuir MemtoReg
+			MemtoReg = false;
+			
+			return 0;
+		default:
+			return 1;
+	}
 	return 1;
+	
+	// IMPLEMENTADO __________________________________________________________
 }
 
 /**
@@ -257,7 +299,7 @@ int BasicCPU::decodeDataProcFloat() {
  * Retorna 0: se executou corretamente e
  *		   1: se o controle presente em ALUctrl não estiver implementado.
  */
-int BasicCPU::EXI()
+int BasicCPU::EXI()						//Aqui
 {
 	// TODO
 	//		Acrescente os cases no switch já iniciado, para acrescentar a
