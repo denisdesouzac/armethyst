@@ -91,7 +91,7 @@ void BasicCPU::IF()
  * Retorna 0: se executou corretamente e
  *		   1: se a instrução não estiver implementada.
  */
-int BasicCPU::ID()						// AQUI
+int BasicCPU::ID()						// AQUI		???
 {
 	// TODO
 	//		Acrescente os cases no switch já iniciado, para detectar o grupo
@@ -119,7 +119,7 @@ int BasicCPU::ID()						// AQUI
 		// x101 Data Processing -- Register on page C4-278
 		case 0x0A000000:
 		case 0x1A000000:
-			return decodeDataProcReg(); // Não soubemos fazer chamar o metodo
+			return decodeDataProcReg(); 
 			break;
 		default:
 			return 1; // instrução não implementada
@@ -232,14 +232,14 @@ int BasicCPU::decodeDataProcReg() {
 	//		que aparece na linha 43 de isummation.S e no endereço 0x68
 	//		de txt_isummation.o.txt.
 
-	// IMPLEMENTADO __________________________________________________________
+	// IMPLEMENTADO __________________________________________________________ // Aqui
 
 	unsigned int n, m, d;
 	switch (IR & 0x7F200000)	//Não considera Shift
 	{
-		case 0x45800000:
+		case 0x0B000000: // Arrumar esse case
 			
-			if (IR & 0x00600000) return 1; // sh = 1 não implementado
+			if (IR & 0x80000000) return 1; // sf = 1 não implementado (apenas 32-bis)
 
 			n = (IR & 0x000003E0) >> 5;
 			A=getW(n);
@@ -253,6 +253,12 @@ int BasicCPU::decodeDataProcReg() {
 			} else {
 				Rd = &(R[d]);
 			}
+
+			// FAZER SHIFT PARA IMM6
+			// FAZER SHIFT PARA SHIFT
+			// LEMBRAR DE SHIFTAR RM PARA FAZER A SOMA
+			// LEMBRAR DE LSM, LSL, LRM
+			// FAZER A OPERAÇÃO DE SOMA DEPOIS DE TER FEITO ESSE SHIF
 			
 			// atribuir ALUctrl
 			ALUctrl = ALUctrlFlag::ADD;
