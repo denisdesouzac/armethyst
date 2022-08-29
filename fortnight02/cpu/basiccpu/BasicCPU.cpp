@@ -91,7 +91,7 @@ void BasicCPU::IF()
  * Retorna 0: se executou corretamente e
  *		   1: se a instrução não estiver implementada.
  */
-int BasicCPU::ID()						// AQUI		???
+int BasicCPU::ID()						// Implementamos Aqui para chamar a função  return decodeDataProcReg(); 
 {
 	// TODO
 	//		Acrescente os cases no switch já iniciado, para detectar o grupo
@@ -232,39 +232,50 @@ int BasicCPU::decodeDataProcReg() {
 	//		que aparece na linha 43 de isummation.S e no endereço 0x68
 	//		de txt_isummation.o.txt.
 
-	// IMPLEMENTADO __________________________________________________________ // Aqui
+	// Inicio do que foi IMPLEMENTADO __________________________________________________________
 
-	unsigned int n, m, d;
-	switch (IR & 0x7F200000)	//Não considera Shift
+	unsigned int n, m, sh, immed; // sh = shift
+	switch (IR & 0x7F200000)	//máscara que Não considera Shift
 	{
 		case 0x0B000000: // Arrumar esse case
 			
 			if (IR & 0x80000000) return 1; // sf = 1 não implementado (apenas 32-bis)
 
-			n = (IR & 0x000003E0) >> 5;
-			A=getW(n);
+			n = (IR & 0x000003E0) >> 5; //Rn
+			A = getW(n);
 
-			m = (IR & 0x001F0000) >> 16;
+			m = (IR & 0x001F0000) >> 16; //Rm
 			B = getW(m);
 
-			d = (IR & 0x0000001F);
-			if (d == 31) {
-				Rd = &SP;
-			} else {
-				Rd = &(R[d]);
-			}
+			immed = (IR & 0x0000FC00) >> 10; //Immed
 
-			// FAZER SHIFT PARA IMM6
-			// FAZER SHIFT PARA SHIFT
-			// LEMBRAR DE SHIFTAR RM PARA FAZER A SOMA
-			// LEMBRAR DE LSM, LSL, LRM
-			// FAZER A OPERAÇÃO DE SOMA DEPOIS DE TER FEITO ESSE SHIF
+			sh = (IR & 0x00C00000) >> 22;	//shift
+
+			switch(sh){	// máscara de tratamento para SHIFT (bits 23-22) e em seguida deslocamento do registrador "Rm"
+
+				// Não fica muito claro na página C6-688 se a instrução é UNSIGNED OU SIGNED (mas lembro do Sr. ter comentado algo a respeito)
+
+				case 0x00:	// LSL UNSIGNED
+					B = (unsigned)B << immed;	// B = m com a quantidade de shift (immed) para esquerda
+				break;
+
+				case 0x01:	// LSR UNSIGNED
+					B = (unsigned)B  >> immed;	// B = m com a quantidade de shift (immed) para direita
+				break;
+					
+				case 0x10: // ASR SIGNED
+					B = (signed)B >> immed;  // B = m com a quantidade de shift (immed) para direita
+				break;
+
+				case 0x11:
+					return 1; // caso reservado (não sei o que fazer ainda, é reservado e UNDEFINED de acordo com o documento)
+
+				default:
+					return 1;
+			} 
 			
 			// atribuir ALUctrl
-			ALUctrl = ALUctrlFlag::ADD;
-			
-			// atribuir MEMctrl
-			MEMctrl = MEMctrlFlag::MEM_NONE;
+			ALUctrl = ALUctrlFlag::ADD;	// Flag de operação soma
 			
 			// atribuir WBctrl
 			WBctrl = WBctrlFlag::RegWrite;
@@ -273,12 +284,20 @@ int BasicCPU::decodeDataProcReg() {
 			MemtoReg = false;
 			
 			return 0;
-		default:
-			return 1;
 	}
+
 	return 1;
+
+	/* 
+		Anotações da aula do que falta implementar:
+		FAZER SHIFT PARA IMM6 - done
+		FAZER SHIFT PARA SHIFT - done
+		LEMBRAR DE SHIFTAR RM PARA FAZER A SOMA - ainda não precisa fazer a soma (apenas ID)
+		LEMBRAR DE LSr, LSL, ASR - done
+		FLAG de soma - done
+	*/
 	
-	// IMPLEMENTADO __________________________________________________________
+	// Fim do que foi IMPLEMENTADO __________________________________________________________
 }
 
 /**
