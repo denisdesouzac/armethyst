@@ -126,8 +126,14 @@ int BasicCPU::ID()
 		// TODO
 		// implementar o GRUPO A SEGUIR
 		//
-		// 101x Loads and Stores on page C4-237
-
+		// x1x0 Loads and Stores on page C4-246
+		//
+		case 0x08000000: // x = 0  x = 0
+		case 0x0C000000: // x = 0  x = 1
+		case 0x18000000: // x = 1  x = 0
+		case 0x1C000000: // x = 1  x = 1
+			return decodeLoadStore();
+			break;
 		
 		// ATIVIDADE FUTURA
 		// implementar os demais grupos
@@ -224,8 +230,17 @@ int BasicCPU::decodeBranches() {
  *		   1: se a instrução não estiver implementada.
  */
 int BasicCPU::decodeLoadStore() {
-	// instrução não implementada
+	switch (IR & 0xFFC00000)
+	{
+	case /* constant-expression */:
+		/* code */
+		break;
+	
+	default:
+		break;
+	}
 	return 1;
+	
 }
 
 /**
