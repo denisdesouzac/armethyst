@@ -230,16 +230,36 @@ int BasicCPU::decodeBranches() {
  *		   1: se a instrução não estiver implementada.
  */
 int BasicCPU::decodeLoadStore() {
+
+	unsigned int n,t,imm12;
+
 	switch (IR & 0xFFC00000)
 	{
-	case /* constant-expression */:
-		/* code */
+	case 0x2E600000: // 1 0 1 1 1 0 0 1 1 0 -> unsigned offset
+		
+		n =(IR & 0x000003E0) >> 5;
+			A=getW(n);
+		
+		t =(IR & 0x0000001F);
+		int BW=getW(t);
+
+		imm12 = (IR & 0x003FFC00) >> 10;
+
+
 		break;
 	
 	default:
 		break;
 	}
 	return 1;
+
+	ALUctrl = ALUctrlFlag::ALU_NONE; // Flag da operação de SOMA
+
+	MEMctrl = MEMctrlFlag::READ64;	// Flag que não terá acesso à memória
+
+	WBctrl = WBctrlFlag::RegWrite;	// Flag que terá escrita ded registrador
+
+	bool MemtoReg = false;
 	
 }
 
