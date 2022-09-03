@@ -235,31 +235,30 @@ int BasicCPU::decodeLoadStore() {
 
 	switch (IR & 0xFFC00000)
 	{
-	case 0x2E600000: // 1 0 1 1 1 0 0 1 1 0 -> unsigned offset
+	case 0xB9800000: // 1 0 1 1 1 0 0 1 1 0 -> unsigned offset 
 		
-		n =(IR & 0x000003E0) >> 5;
-			A=getW(n);
+		n =(IR & 0x000003E0) >> 5;	// Rn
+			A = getX(n);
 		
-		t =(IR & 0x0000001F);
-		int BW=getW(t);
+		t =(IR & 0x0000001F);	// Rt -> registrador destino
+			Rd = &(R[t]);
 
-		imm12 = (IR & 0x003FFC00) >> 10;
+		B = (IR & 0x003FFC00) >> 8;	// pimm
 
+		ALUctrl = ALUctrlFlag::ADD; 
+
+		MEMctrl = MEMctrlFlag::READ64;	// Flag que não terá acesso à memória
+
+		WBctrl = WBctrlFlag::RegWrite;	// Flag que terá escrita ded registrador
+
+		bool MemtoReg = true;
 
 		break;
 	
 	default:
-		break;
+		return 1;
 	}
 	return 1;
-
-	ALUctrl = ALUctrlFlag::ALU_NONE; // Flag da operação de SOMA
-
-	MEMctrl = MEMctrlFlag::READ64;	// Flag que não terá acesso à memória
-
-	WBctrl = WBctrlFlag::RegWrite;	// Flag que terá escrita ded registrador
-
-	bool MemtoReg = false;
 	
 }
 
