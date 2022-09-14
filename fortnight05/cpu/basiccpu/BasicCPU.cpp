@@ -126,7 +126,7 @@ int BasicCPU::ID()
 		// TODO
 		// implementar o GRUPO A SEGUIR
 		//
-		// x1x0 Loads and Stores on page C4-246
+		// x1x0 Loads and Stores on page C4-232
 		//
 		case 0x08000000: // x = 0  x = 0
 		case 0x0C000000: // x = 0  x = 1
@@ -154,7 +154,7 @@ int BasicCPU::ID()
  * Retorna 0: se executou corretamente e
  *		   1: se a instrução não estiver implementada.
  */
-int BasicCPU::decodeDataProcImm() {
+int BasicCPU::decodeDataProcImm() {		// Operação: SUB
 	unsigned int n, d;
 	int imm;
 	
@@ -229,31 +229,34 @@ int BasicCPU::decodeBranches() {
  * Retorna 0: se executou corretamente e
  *		   1: se a instrução não estiver implementada.
  */
-int BasicCPU::decodeLoadStore() {
+int BasicCPU::decodeLoadStore() {		// Operação Load/Store
 
-	unsigned int n,t,imm12;
+	unsigned int n,t;
 
-	switch (IR & 0xFFC00000)
+	switch (IR & 0xFFC00000)	// Máscara para "filtrar os bits" (é a mesma pra LOAD e para STORE) - ok
 	{
-	case 0xB9800000: // 1 0 1 1 1 0 0 1 1 0 -> unsigned offset 
+	case 0xB9800000: // 1 0 1 1 1 0 0 1 1 0 -> LDSRW unsigned offset, page C6-913 - Case para dar match na instrução - ok 
 		
-		n =(IR & 0x000003E0) >> 5;	// Rn
+		n =(IR & 0x000003E0) >> 5;	// Rn = A - ok
 			A = getX(n);
 		
-		t =(IR & 0x0000001F);	// Rt -> registrador destino
+		t =(IR & 0x0000001F);	// Rt -> endereço do registrador destino - ok
 			Rd = &(R[t]);
 
-		B = (IR & 0x003FFC00) >> 8;	// pimm
+		B = (IR & 0x003FFC00) >> 8;	// pimm (imm12) = B - ok (deslocado apenas 8 ao invés de 10 pois consiste em um número / 4 ) 
 
-		ALUctrl = ALUctrlFlag::ADD; 
+		ALUctrl = ALUctrlFlag::ADD; // Responsável por fazer o deslocamento 
 
-		MEMctrl = MEMctrlFlag::READ64;	// Flag que não terá acesso à memória
+		MEMctrl = MEMctrlFlag::READ64;	// Flag que terá acesso à memória
 
-		WBctrl = WBctrlFlag::RegWrite;	// Flag que terá escrita ded registrador
+		WBctrl = WBctrlFlag::RegWrite;	// Flag que terá escrita em registrador
 
-		bool MemtoReg = true;
+		bool MemtoReg = true; // Terá leitura
 
 		break;
+	
+	case 0xB9000000: // 1 0 1 1 1 0 0 1 0 0 // STR unsigned offset - size = 10 	// 32-bits	?
+	case 0xF9000000: // 1 1 1 1 1 0 0 1 0 0 //STR unsigned offset - size = 11	// 64-bits	?
 	
 	default:
 		return 1;
@@ -269,7 +272,7 @@ int BasicCPU::decodeLoadStore() {
  * Retorna 0: se executou corretamente e
  *		   1: se a instrução não estiver implementada.
  */
-int BasicCPU::decodeDataProcReg() {
+int BasicCPU::decodeDataProcReg() {		// Operação: ADD
 	// TODO
 	// acrescentar switches e cases à medida em que forem sendo
 	// adicionadas implementações de instruções de processamento
@@ -314,7 +317,7 @@ int BasicCPU::decodeDataProcReg() {
 
 			MEMctrl = MEMctrlFlag::MEM_NONE;	// Flag que não terá acesso à memória
 
-			WBctrl = WBctrlFlag::RegWrite;	// Flag que terá escrita ded registrador
+			WBctrl = WBctrlFlag::RegWrite;	// Flag que terá escrita em registrador
 
 			MemtoReg = false;	// Não acessa a memória
 
@@ -415,7 +418,7 @@ int BasicCPU::EXI()
 	switch (ALUctrl)
 	{
 		case ALUctrlFlag::SUB:
-			ALUout = A - B;
+			ALUout = A - B;		// Implementação da operaçao de SUBTRAÇÃO
 			return 0;
 		case ALUctrlFlag::ADD:
 			ALUout = A + B;		// Implementação da operação de SOMA
@@ -492,7 +495,7 @@ int BasicCPU::MEM()
 		memory->writeData32(ALUout,*Rd);
 		return 0;
 	case MEMctrlFlag::READ64:
-		MDR = memory->readData64(ALUout);
+		MDR = memory->readData64(ALUout);	// Faz a leitura do endereço passado (coloca na saída MDR a informação)
 		return 0;
 	case MEMctrlFlag::WRITE64:
 		memory->writeData64(ALUout,*Rd);
@@ -522,9 +525,9 @@ int BasicCPU::WB()
     switch (WBctrl) {
         case WBctrlFlag::WB_NONE:
             return 0;
-        case WBctrlFlag::RegWrite:
-            if (MemtoReg) {
-                *Rd = MDR;
+        case WBctrlFlag::RegWrite:	// Escrita
+            if (MemtoReg) {			// Se a flag de MemToReg for true, teremos leitura
+                *Rd = MDR;			// Coloca na saída Rd o que recebeu de MDR 
             } else {
                 *Rd = ALUout;
             }
