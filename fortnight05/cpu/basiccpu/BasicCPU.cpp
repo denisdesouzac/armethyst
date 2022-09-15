@@ -245,7 +245,7 @@ int BasicCPU::decodeLoadStore() {		// Operação Load/Store
 				A = getX(n);
 			}
 		
-		t =(IR & 0x0000001F);	// Rt -> endereço do registrador destino - ok
+		t =(IR & 0x0000001F);	// Rt -> endereço do registrador destino - ok	// ok
 			if(t == 31){
 				Rd = &ZR;
 			}
