@@ -238,10 +238,20 @@ int BasicCPU::decodeLoadStore() {		// Operação Load/Store
 	case 0xB9800000: // 1 0 1 1 1 0 0 1 1 0 -> LDSRW unsigned offset, page C6-913 - Case para dar match na instrução - ok 
 		
 		n =(IR & 0x000003E0) >> 5;	// Rn = A - ok
-			A = getX(n);
+			if(n == 31){
+				A = SP;
+			}
+			else{
+				A = getX(n);
+			}
 		
 		t =(IR & 0x0000001F);	// Rt -> endereço do registrador destino - ok
-			Rd = &(R[t]);
+			if(t == 31){
+				Rd = &ZR;
+			}
+			else{
+				Rd = &(R[t]);
+			}
 
 		B = (IR & 0x003FFC00) >> 8;	// pimm (imm12) = B - ok (deslocado apenas 8 ao invés de 10 pois consiste em um número / 4 ) 
 
@@ -253,27 +263,38 @@ int BasicCPU::decodeLoadStore() {		// Operação Load/Store
 
 		MemtoReg = true; // Terá leitura
 
-		break;
+		return 0;
 	
 	case 0xB9000000: // 1 0 1 1 1 0 0 1 0 0 // STR unsigned offset - size = 10 	// 32-bits	?
 	case 0xF9000000: // 1 1 1 1 1 0 0 1 0 0 // sSTR unsigned offset - size = 11	// 64-bits	?
 		t = (IR & 0x0000001F); // Rt = destino
-			Rd = &(R[t]);
+			if(t == 31){
+				Rd = &ZR;
+			}
+			else{
+				Rd = &(R[t]);
+			}
 
 		n = (IR & 0x000003E0) >> 5; // Rn = A
-			A = getX(n);
+			if(n == 31){
+				A = SP;
+			}
+			else{
+				A = getX(n);
+			}
+			
 
 		B = (IR & 0x003FFC00) >> 8; // pimm (imm12) = B - É deslocado 8 bits apenas pois temos divisão por 4
 
 		ALUctrl = ALUctrlFlag::ADD; // Responsável por fazer o deslocamento 
 
-		MEMctrl = MEMctrlFlag::WRITE64;	// Flag que terá acesso à memória
+		MEMctrl = MEMctrlFlag::WRITE32;	// Flag que terá acesso à memória
 
 		WBctrl = WBctrlFlag::WB_NONE;	// Flag que terá escrita em registrador
 
 		MemtoReg = false; // Terá leitura
 		
-		break;
+		return 0;
 	
 	default:
 		return 1;
