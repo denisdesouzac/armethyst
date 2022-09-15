@@ -251,12 +251,29 @@ int BasicCPU::decodeLoadStore() {		// Operação Load/Store
 
 		WBctrl = WBctrlFlag::RegWrite;	// Flag que terá escrita em registrador
 
-		bool MemtoReg = true; // Terá leitura
+		MemtoReg = true; // Terá leitura
 
 		break;
 	
 	case 0xB9000000: // 1 0 1 1 1 0 0 1 0 0 // STR unsigned offset - size = 10 	// 32-bits	?
-	case 0xF9000000: // 1 1 1 1 1 0 0 1 0 0 //STR unsigned offset - size = 11	// 64-bits	?
+	case 0xF9000000: // 1 1 1 1 1 0 0 1 0 0 // sSTR unsigned offset - size = 11	// 64-bits	?
+		t = (IR & 0x0000001F); // Rt = destino
+			Rd = &(R[t]);
+
+		n = (IR & 0x000003E0) >> 5; // Rn = A
+			A = getX(n);
+
+		B = (IR & 0x003FFC00) >> 8; // pimm (imm12) = B - É deslocado 8 bits apenas pois temos divisão por 4
+
+		ALUctrl = ALUctrlFlag::ADD; // Responsável por fazer o deslocamento 
+
+		MEMctrl = MEMctrlFlag::WRITE64;	// Flag que terá acesso à memória
+
+		WBctrl = WBctrlFlag::WB_NONE;	// Flag que terá escrita em registrador
+
+		MemtoReg = false; // Terá leitura
+		
+		break;
 	
 	default:
 		return 1;
