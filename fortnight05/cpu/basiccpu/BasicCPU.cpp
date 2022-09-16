@@ -135,8 +135,12 @@ int BasicCPU::ID()
 			return decodeLoadStore();
 			break;
 		
-		// ATIVIDADE FUTURA
-		// implementar os demais grupos
+		// Grupo de BRANCH
+		case 0x14000000: // x = 0
+		case 0x16000000: // x = 1
+			return decodeBranches();
+			break;
+		
 		
 		default:
 			return 1; // instrução não implementada
@@ -218,7 +222,16 @@ int BasicCPU::decodeDataProcImm() {		// Operação: SUB
  *		   1: se a instrução não estiver implementada.
  */
 int BasicCPU::decodeBranches() {
-	// instrução não implementada
+	int imm26;
+	switch (IR & 0xFC000000)
+	{
+	case 0x94000000:
+		imm26 = (IR & 0x03FFFFFF) >> 2;
+		return 0; // ???? Não sei mais o que fazer
+	
+	default:
+		break;
+	}
 	return 1;
 }
 
@@ -298,6 +311,16 @@ int BasicCPU::decodeLoadStore() {		// Operação Load/Store
 	
 	default:
 		return 1;
+	}
+	switch (IR & 0xFFE00C00)
+	{
+	case 0xB8600800:
+	case 0xF8600800:
+		
+		break;
+	
+	default:
+		break;
 	}
 	return 1;
 	

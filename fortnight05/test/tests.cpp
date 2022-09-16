@@ -89,10 +89,10 @@ int testFortnight05(BasicCPUTest *cpu, BasicMemoryTest* memory)
     test01(cpu, memory, TEST_FILE_ISUMMATION);
 
 	// isummation.S: all load/store instructions
-	test03(cpu, memory, TEST_FILE_ISUMMATION);
+	//test03(cpu, memory, TEST_FILE_ISUMMATION);
 	
 	// isummation.S: all inconditional branches
-//	test06(cpu, memory, TEST_FILE_ISUMMATION);
+	test06(cpu, memory, TEST_FILE_ISUMMATION);
 	
 	// fpops.S: sub (line 26), fadd (line 45) and fsub (line 58)
 	test02(cpu, memory, TEST_FILE_FPOPS);
