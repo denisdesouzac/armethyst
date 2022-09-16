@@ -158,7 +158,7 @@ int BasicCPU::ID()
  * Retorna 0: se executou corretamente e
  *		   1: se a instrução não estiver implementada.
  */
-int BasicCPU::decodeDataProcImm() {		// Operação: SUB
+int BasicCPU::decodeDataProcImm() {		
 	unsigned int n, d;
 	int imm;
 	
@@ -167,7 +167,7 @@ int BasicCPU::decodeDataProcImm() {		// Operação: SUB
 		instruction class. The encodings in this section are decoded from
 		Data Processing -- Immediate on page C4-232.
 	*/
-	switch (IR & 0xFF800000)
+	switch (IR & 0xFF800000)	// Operação: SUB
 	{
 		case 0xD1000000:
 			//1 1 0 SUB (immediate) - 64-bit variant on page C6-1199
@@ -242,7 +242,7 @@ int BasicCPU::decodeBranches() {
  * Retorna 0: se executou corretamente e
  *		   1: se a instrução não estiver implementada.
  */
-int BasicCPU::decodeLoadStore() {		// Operação Load/Store
+int BasicCPU::decodeLoadStore() {		// Operações Load/Store
 
 	unsigned int n,t;
 
@@ -279,7 +279,7 @@ int BasicCPU::decodeLoadStore() {		// Operação Load/Store
 		return 0;
 	
 	case 0xB9000000: // 1 0 1 1 1 0 0 1 0 0 // STR unsigned offset - size = 10 	// 32-bits	?
-	case 0xF9000000: // 1 1 1 1 1 0 0 1 0 0 // sSTR unsigned offset - size = 11	// 64-bits	?
+	case 0xF9000000: // 1 1 1 1 1 0 0 1 0 0 // STR unsigned offset - size = 11	// 64-bits	?
 		t = (IR & 0x0000001F); // Rt = destino
 			if(t == 31){
 				Rd = &ZR;
@@ -301,11 +301,11 @@ int BasicCPU::decodeLoadStore() {		// Operação Load/Store
 
 		ALUctrl = ALUctrlFlag::ADD; // Responsável por fazer o deslocamento 
 
-		MEMctrl = MEMctrlFlag::WRITE32;	// Flag que terá acesso à memória
+		MEMctrl = MEMctrlFlag::WRITE32;	// Flag que terá acesso à memória (escrita)
 
-		WBctrl = WBctrlFlag::WB_NONE;	// Flag que terá escrita em registrador
+		WBctrl = WBctrlFlag::WB_NONE;	// Store não tem WB
 
-		MemtoReg = false; // Terá leitura
+		MemtoReg = false; 
 		
 		return 0;
 	
@@ -333,7 +333,7 @@ int BasicCPU::decodeLoadStore() {		// Operação Load/Store
  * Retorna 0: se executou corretamente e
  *		   1: se a instrução não estiver implementada.
  */
-int BasicCPU::decodeDataProcReg() {		// Operação: ADD
+int BasicCPU::decodeDataProcReg() {		
 	// TODO
 	// acrescentar switches e cases à medida em que forem sendo
 	// adicionadas implementações de instruções de processamento
@@ -341,7 +341,7 @@ int BasicCPU::decodeDataProcReg() {		// Operação: ADD
 
 	unsigned int n,m,shift,imm6;
 	
-	switch (IR & 0xFF200000)
+	switch (IR & 0xFF200000)	// Operação: ADD
 	{
 		
 		// C6.2.5 ADD (shifted register) p. C6-688
